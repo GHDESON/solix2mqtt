@@ -295,6 +295,14 @@ export interface SiteDeviceParamResponse<T extends ParamType> {
   param_data: ParamData<T>
 }
 
+export interface PvStatusResponse {
+  pvStatuses: Array<{
+    sn: string;
+    power: number;
+    status: number;
+  }>;
+}
+
 export class SolixApi {
   private readonly SERVER_PUBLIC_KEY = "04c5c00c4f8d1197cc7c3167c52bf7acb054d722f0ef08dcd7e0883236e0d72a3868d9750cb47fa4619248f3d83f0f662671dadc6e2d31c2f41db0161651c7c076";
 
@@ -398,6 +406,10 @@ export class SolixApi {
       scenInfo: async (siteId: string) => {
         const data = { site_id: siteId };
         return authFetch<ScenInfo>("/power_service/v1/site/get_scen_info", data);
+      },
+      getPvStatus: async (deviceSn: string) => {
+        const data = { sns: deviceSn };
+        return authFetch<PvStatusResponse>("/charging_pv_svc/getPvStatus", data);
       },
       energyAnalysis:async ({
         siteId,

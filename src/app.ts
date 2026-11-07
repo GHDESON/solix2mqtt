@@ -56,6 +56,33 @@ async function run(): Promise<void> {
         topic = `${config.mqttTopic}/site/${site.site_name}/scenInfo`;
         await publisher.publish(topic, scenInfo.data);
       }
+
+      // MI80 separat abfragen: Fehler dürfen die Solarbank-Daten nicht beeinträchtigen.
+      try {
+        const deviceResponse = await loggedInApi.getRelateAndBindDevices();
+        const devices = deviceResponse.data?.data ?? [];
+        const mi80 = devices.find(device => device.product_code === "A5143");
+
+        if (mi80) {
+          const pvResponse = await loggedInApi.getPvStatus(mi80.device_sn);
+          const pvStatus = pvResponse.data?.pvStatuses?.[0];
+
+          if (pvResponse.code === 0 && pvStatus) {
+            const mi80Topic = `${config.mqttTopic}/mi80`;
+            await publisher.publish(`${mi80Topic}/power`, pvStatus.power);
+            await publisher.publish(`${mi80Topic}/status`, pvStatus.status);
+            await publisher.publish(`${mi80Topic}/raw`, pvResponse.data);
+            logger.log(`MI80 power: ${pvStatus.power} W`);
+          } else {
+            logger.warn(`MI80 API returned no valid PV status: ${pvResponse.msg} (${pvResponse.code})`);
+          }
+        } else {
+          logger.log("No MI80 found in device list.");
+        }
+      } catch (e) {
+        logger.warn("MI80 query or publishing failed; Solarbank data was already published.", e);
+      }
+
       logger.log("Published.");
     } else {
       logger.error("Not logged in");
