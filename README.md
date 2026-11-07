@@ -1,9 +1,19 @@
 # solix2mqtt
 
-CLI tool to poll data for an Anker SOLIX Solarbank E1600 Balcony Power Storage and publish it to an MQTT broker.
+CLI tool to poll data from Anker SOLIX devices and publish it to an MQTT broker. This fork adds support for the MI80 microinverter alongside the Solarbank E1600.
 
 ## Description
 This is a thin bridge between the API used by the Anker App and MQTT. Although the project is currently read-only, adding support for updates should be relatively straightforward. Feel free to open a PR.
+
+## MI80 Microinverter
+
+The MI80 is detected automatically from the Anker device list. Its current PV power and status are retrieved from the Anker API and published using the configured MQTT topic prefix (default: `solix`):
+
+- `<topic-prefix>/mi80/power` – current power output in watts
+- `<topic-prefix>/mi80/status` – device status reported by the API
+- `<topic-prefix>/mi80/raw` – PV status response from the API
+
+The existing Solarbank topics are unchanged. MI80 data is polled at the configured polling interval.
 
 ## Prerequisites
 
