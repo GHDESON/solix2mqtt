@@ -42,7 +42,7 @@ The existing Solarbank topics are unchanged. MI80 data is polled at the configur
    npm run build
    ```
 
-The explicit branch selection ensures that you obtain the MI80-enabled version, even if the repository's default branch changes later.
+The explicit branch selection ensures that you obtain the MI80-enabled version, even if the repository's default branch changes later. The `npm run build` command compiles the TypeScript source files in `src/` into JavaScript files in `bin/`. This build is required before starting the application with `npm run start` and should be repeated after changing the source code.
 
 ## Usage
 
@@ -97,7 +97,7 @@ The application can be configured using the following environment variables:
 - `S2M_MQTT_PASSWORD` (optional): MQTT password
 - `S2M_MQTT_CLIENT_ID` (optional): MQTT client identifier (default: `solix2mqtt`)
 - `S2M_MQTT_TOPIC` (optional): Topic prefix for published data (default: `solix`)
-- `S2M_MQTT_RETAIN` (optional): Set to `true` to publish retained MQTT messages (default: `false`)
+- `S2M_MQTT_RETAIN` (optional): Set to `true` to publish retained MQTT messages (default: `false`). The broker stores the latest value per topic and sends it immediately to new subscribers. Retained values remain at the broker until replaced or explicitly cleared.
 - `S2M_VERBOSE` (optional): Set to `true` for more log output (default: `false`)
 
 ## Authentication
