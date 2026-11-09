@@ -77,7 +77,7 @@ docker run -d \
   -e S2M_USER=*** \
   -e S2M_PASSWORD=*** \
   -e S2M_COUNTRY=DE \
-  -e S2M_MQTT_URI=mqtt://<MQTT-BROKER-HOST>:1883 \
+  -e "S2M_MQTT_URI=mqtt://<MQTT-BROKER-HOST>:1883" \
   solix2mqtt:mi80-support
 ```
 
