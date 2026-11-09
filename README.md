@@ -62,7 +62,26 @@ Replace the placeholder values with your own settings. Do not publish your crede
 
 ### Docker
 
-The Docker image referenced by the original project belongs to the upstream maintainer and may not include the MI80 changes in this fork. For MI80 support, build and run an image from this repository's `mi80-support` branch, or use the local Node.js setup above.
+The image `tomquist/solix2mqtt:latest` belongs to the upstream project and is not built from this fork. To use the MI80-enabled version, build the image locally from this repository's `mi80-support` branch:
+
+```bash
+docker build -t solix2mqtt:mi80-support .
+```
+
+Then start the container, replacing the example values with your own Anker and MQTT settings:
+
+```bash
+docker run -d \
+  --name solix2mqtt \
+  --restart unless-stopped \
+  -e S2M_USER=*** \
+  -e S2M_PASSWORD=*** \
+  -e S2M_COUNTRY=DE \
+  -e S2M_MQTT_URI=mqtt://<MQTT-BROKER-HOST>:1883 \
+  solix2mqtt:mi80-support
+```
+
+Use a broker hostname or IP address that is reachable from inside the container. Do not use `localhost` unless the MQTT broker runs in the same container or the container is configured to use the host network.
 
 ## Configuration
 
