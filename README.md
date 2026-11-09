@@ -1,9 +1,10 @@
 # solix2mqtt
 
-CLI tool to poll data from Anker SOLIX devices and publish it to an MQTT broker. This fork adds support for the MI80 microinverter alongside the Solarbank E1600.
+CLI tool to poll data from Anker SOLIX devices and publish it to an MQTT broker. This fork adds support for the Anker SOLIX MI80 microinverter alongside the Solarbank E1600.
 
 ## Description
-This is a thin bridge between the API used by the Anker App and MQTT. Although the project is currently read-only, adding support for updates should be relatively straightforward. Feel free to open a PR.
+
+This project is a read-only bridge between the API used by the Anker App and an MQTT broker.
 
 ## MI80 Microinverter
 
@@ -17,69 +18,86 @@ The existing Solarbank topics are unchanged. MI80 data is polled at the configur
 
 ## Prerequisites
 
-Before you begin, ensure you have met the following requirements:
+- **[Node.js](https://nodejs.org/)** – required to run the project.
+- **npm** – included with the Node.js installation.
 
-### Software
-- **[Node.js](https://nodejs.org/)**: You will need Node.js to run this project. Download and install it from [nodejs.org](https://nodejs.org/).
-- **[npm](https://www.npmjs.com/)**: This project uses npm for dependency management. It is included with the Node.js installation.
+## Setup
 
-### Setup
-1. **Clone the repository**: Clone this repository to your local machine using `git clone https://github.com/tomquist/solix2mqtt.git`.
-2. **Navigate to the project directory**: `cd solix2mqtt`.
-3. **Install dependencies**: Run `npm install` to install all the project dependencies.
+1. Clone this fork and explicitly select the MI80 branch:
 
-With these steps, you will have set up the necessary environment to run and use `solix2mqtt`.
+   ```bash
+   git clone --branch mi80-support https://github.com/GHDESON/solix2mqtt.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd solix2mqtt
+   ```
+
+3. Install dependencies and build the application:
+
+   ```bash
+   npm install
+   npm run build
+   ```
+
+The explicit branch selection ensures that you obtain the MI80-enabled version, even if the repository's default branch changes later.
 
 ## Usage
+
 ### Locally
+
+Set the required environment variables for your Anker account and MQTT broker, then start the application:
+
 ```bash
-npm install && npm run build
-  S2M_USER=*** \
-  S2M_PASSWORD=*** \
-  S2M_COUNTRY=DE \
-  S2M_MQTT_URI=mqtt://localhost:1883 \
-  npm run start
+S2M_USER=*** \
+S2M_PASSWORD=*** \
+S2M_COUNTRY=DE \
+S2M_MQTT_URI=mqtt://localhost:1883 \
+npm run start
 ```
+
+Replace the placeholder values with your own settings. Do not publish your credentials or commit them to the repository.
 
 ### Docker
-```bash
-docker run -d \
-  -e S2M_USER=*** \
-  -e S2M_PASSWORD=*** \
-  -e S2M_COUNTRY=DE \
-  -e S2M_MQTT_URI=mqtt://localhost:1883 \
-  tomquist/solix2mqtt:latest
-```
+
+The Docker image referenced by the original project belongs to the upstream maintainer and may not include the MI80 changes in this fork. For MI80 support, build and run an image from this repository's `mi80-support` branch, or use the local Node.js setup above.
 
 ## Configuration
-The app can be configured using the following environment variables:
+
+The application can be configured using the following environment variables:
 
 - `S2M_USER` (required): Email address of your Anker account
 - `S2M_PASSWORD` (required): Password of your Anker account
-- `S2M_COUNTRY` (required): A two-letter country code (e.g. `DE`)
-- `S2M_LOGIN_STORE` (optional): Path to a file where the auth tokens will be cached. (default `auth.data`)
-- `S2M_POLL_INTERVAL` (optional): The polling interval in seconds (default `60`) 
-- `S2M_MQTT_URI` (required): The MQTT broker URL, e.g. `mqtt://host:1883`
-- `S2M_MQTT_USERNAME` (optional): Optional username for MQTT authentication
-- `S2M_MQTT_PASSWORD` (optional): Optional password for MQTT authentication
-- `S2M_MQTT_CLIENT_ID` (optional): MQTT client identifier (default: `solix2mqtt``)
-- `S2M_MQTT_TOPIC` (required): Topic prefix where data should be published (default: `solix``)
-- `S2M_VERBOSE` (optional): Set to true for more logs (default: `false``)
+- `S2M_COUNTRY` (required): Two-letter country code (e.g. `DE`)
+- `S2M_LOGIN_STORE` (optional): File used to cache authentication tokens (default: `auth.data`)
+- `S2M_POLL_INTERVAL` (optional): Polling interval in seconds (default: `30`)
+- `S2M_MQTT_URI` (required): MQTT broker URL (e.g. `mqtt://localhost:1883`)
+- `S2M_MQTT_USERNAME` (optional): MQTT username
+- `S2M_MQTT_PASSWORD` (optional): MQTT password
+- `S2M_MQTT_CLIENT_ID` (optional): MQTT client identifier (default: `solix2mqtt`)
+- `S2M_MQTT_TOPIC` (optional): Topic prefix for published data (default: `solix`)
+- `S2M_MQTT_RETAIN` (optional): Set to `true` to publish retained MQTT messages (default: `false`)
+- `S2M_VERBOSE` (optional): Set to `true` for more log output (default: `false`)
 
-## Auth
+## Authentication
 
-The App utilizes an advanced version of the auth mechanism known from Eufy. The Anker App employs a two-step authentication scheme: first, keys are exchanged, and second, the full login payload is encrypted. However, it turns out the original Eufy mechanism still works, so we're using that in this project (credits to [eufy-security-client](https://github.com/bropat/eufy-security-client) for inspiration). This might break at some point!
+The application uses an authentication mechanism inspired by the one used in the Eufy ecosystem. The Anker App employs a two-step authentication scheme. The implementation used by this project may stop working if Anker changes its API or authentication mechanism.
 
-For a "READ-ONLY" access to the data, an account with which the "System" has been shared can be used. By this the main account can still be used in the app to control everything and the shared account can be used for the API access.
+For read-only access, an Anker account with which the system has been shared can be used. This allows the main account to continue controlling the system in the Anker app while the shared account is used for API access.
 
-**Note**: Anker currently permits only one simultaneous login at a time. When you log in from another device, all previously generated auth tokens become invalidated.
+**Note:** Anker may permit only one simultaneous login at a time. Logging in from another device can invalidate previously generated authentication tokens.
 
 ## Disclaimer
-This project is the result of some work I did to integrate my Solix into my home automation. I no longer own an Anker Solix Solarbank due to disappointment with the product, so this project will not receive any updates. However, I'm happy to accept pull requests.
+
+This project is an independent, community-maintained fork of [tomquist/solix2mqtt](https://github.com/tomquist/solix2mqtt). It is not an official Anker project. The MI80 support was added in this fork and is provided without any guarantee. Contributions and issue reports are welcome.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
-- [eufy-security-client](https://github.com/bropat/eufy-security-client)
+
+- [Original solix2mqtt project by Tom Quist](https://github.com/tomquist/solix2mqtt)
+- [eufy-security-client](https://github.com/bropat/eufy-security-client) for authentication-related inspiration
